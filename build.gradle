@@ -1,0 +1,38 @@
+group 'com.robo4j'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+
+apply from: 'libraries.gradle'
+
+version "${robo4jVersion}"
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'robo4j-tank-joystick',
+                'Implementation-Version': version,
+                'Main-Class': 'com.robo4j.joystick.tank.TankJoystickMain'
+    }
+    //baseName = project.name + '-all'
+    baseName = 'robo4j-tank-joystick'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+dependencies {
+    compile "com.robo4j:robo4j-core:${robo4jVersion}"
+    testCompile "junit:junit:${junitVersion}@jar"
+    testCompile "org.hamcrest:hamcrest-all:${hamcrestAllVersion}@jar"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "${gradleVersion}"
+}
