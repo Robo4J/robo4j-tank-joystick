@@ -76,6 +76,7 @@ public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 		setState(LifecycleState.STOPPED);
 	}
 
+	@Override
 	public void shutdown() {
 		setState(LifecycleState.SHUTTING_DOWN);
 		setState(LifecycleState.SHUTDOWN);

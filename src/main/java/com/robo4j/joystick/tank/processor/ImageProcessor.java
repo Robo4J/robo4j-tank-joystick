@@ -60,7 +60,8 @@ public class ImageProcessor extends RoboUnit<CameraMessage> {
     @Override
     public void onMessage(CameraMessage message) {
         SimpleLoggingUtil.print(getClass(), "JAVAFX output: " + output + " -> onMessage: " + message);
-        image = new Image(new ByteArrayInputStream(message.getImage()));
+        SimpleLoggingUtil.print(getClass(), "JAVAFX ImageSize: " + message.getImage().length());
+        image = new Image(new ByteArrayInputStream(message.getImage().getBytes()));
     }
 
     @SuppressWarnings("unchecked")
