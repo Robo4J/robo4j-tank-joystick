@@ -18,6 +18,7 @@
 package com.robo4j.joystick.tank.processor;
 
 import java.io.ByteArrayInputStream;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -61,7 +62,7 @@ public class ImageProcessor extends RoboUnit<CameraMessage> {
     public void onMessage(CameraMessage message) {
         SimpleLoggingUtil.print(getClass(), "JAVAFX output: " + output + " -> onMessage: " + message);
         SimpleLoggingUtil.print(getClass(), "JAVAFX ImageSize: " + message.getImage().length());
-        image = new Image(new ByteArrayInputStream(message.getImage().getBytes()));
+        image = new Image(new ByteArrayInputStream(Base64.getDecoder().decode(message.getImage())));
     }
 
     @SuppressWarnings("unchecked")
