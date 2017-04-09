@@ -47,21 +47,18 @@ public class ImageController extends RoboUnit<CameraMessage> {
 
     @Override
     public void onMessage(CameraMessage message) {
-        SimpleLoggingUtil.print(getClass(), "onMessage target: "+ target + ", message: " + message );
         getContext().getReference(target).sendMessage(message);
     }
 
     @Override
     public void stop() {
         setState(LifecycleState.STOPPING);
-        System.out.println("Stopping server...");
         setState(LifecycleState.STOPPED);
     }
 
     @Override
     public void shutdown() {
         setState(LifecycleState.SHUTTING_DOWN);
-        System.out.println("shutting down example...");
         setState(LifecycleState.SHUTDOWN);
         System.exit(0);
     }
