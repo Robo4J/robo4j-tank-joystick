@@ -17,10 +17,7 @@
 
 package com.robo4j.joystick.tank.processor;
 
-import java.io.ByteArrayInputStream;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
 
 import com.robo4j.core.AttributeDescriptor;
 import com.robo4j.core.ConfigurationException;
@@ -29,7 +26,7 @@ import com.robo4j.core.RoboContext;
 import com.robo4j.core.RoboUnit;
 import com.robo4j.core.configuration.Configuration;
 import com.robo4j.core.httpunit.codec.CameraMessage;
-import com.robo4j.core.logging.SimpleLoggingUtil;
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 
 import javafx.scene.image.Image;
 
@@ -40,9 +37,8 @@ import javafx.scene.image.Image;
 public class ImageProcessor extends RoboUnit<CameraMessage> {
     private static final String NO_SIGNAL_IMAGE = "20161021_NoSignal_640.png";
     private static final AttributeDescriptor<Image> ATTRIBUTE_IMAGE = DefaultAttributeDescriptor.create(Image.class, "image");
-    private static final Collection<AttributeDescriptor<?>> KNOWN_ATTRIBUTES = Collections.singleton(ATTRIBUTE_IMAGE);
     private String output;
-    private Image image;
+    private volatile Image image;
 
     public ImageProcessor(RoboContext context, String id) {
         super(CameraMessage.class, context, id);
@@ -60,9 +56,8 @@ public class ImageProcessor extends RoboUnit<CameraMessage> {
 
     @Override
     public void onMessage(CameraMessage message) {
-        SimpleLoggingUtil.print(getClass(), "JAVAFX output: " + output + " -> onMessage: " + message);
-        SimpleLoggingUtil.print(getClass(), "JAVAFX ImageSize: " + message.getImage().length());
-        image = new Image(new ByteArrayInputStream(Base64.getDecoder().decode(message.getImage())));
+        final byte[] bytes = Base64.getDecoder().decode(message.getImage());
+        image = new Image(new ByteInputStream(bytes, bytes.length));
     }
 
     @SuppressWarnings("unchecked")
