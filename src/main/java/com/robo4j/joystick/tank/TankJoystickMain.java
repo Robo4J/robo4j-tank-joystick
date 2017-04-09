@@ -104,8 +104,8 @@ public class TankJoystickMain extends Application {
 		this.scheduledExecutor2 = Executors.newScheduledThreadPool(1);
 
 		cameraCommandsOpt = new AtomicReference<>(OPT_COMMANDS_TEXT_FIELD);
-		this.optCommandsTextField = new TextField(OPT_COMMANDS_TEXT_FIELD);
-		this.optCommandsTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+		optCommandsTextField = new TextField(OPT_COMMANDS_TEXT_FIELD);
+		optCommandsTextField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (!oldValue.equals(newValue) && !newValue.isEmpty()) {
 				cameraCommandsOpt.set(newValue);
 			}
