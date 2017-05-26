@@ -23,7 +23,7 @@ import com.robo4j.core.RoboContext;
 import com.robo4j.core.RoboUnit;
 import com.robo4j.core.client.util.RoboHttpUtils;
 import com.robo4j.core.configuration.Configuration;
-import com.robo4j.core.util.ConstantUtil;
+import com.robo4j.core.httpunit.Constants;
 import com.robo4j.joystick.tank.codec.LegoButtonPlateCodec;
 import com.robo4j.joystick.tank.layout.enums.JoystickCommandEnum;
 
@@ -58,7 +58,7 @@ public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 		if (IPAddressUtil.isIPv4LiteralAddress(tmpClient)) {
 			String clientPort = configuration.getString("clientPort", null);
 			client = clientPort == null ? tmpClient : tmpClient.concat(":").concat(clientPort);
-			clientUri = configuration.getString("clientUri", ConstantUtil.EMPTY_STRING);
+			clientUri = configuration.getString("clientUri", Constants.EMPTY_STRING);
 		} else {
 			client = null;
 		}

@@ -58,7 +58,7 @@
         <config name="com.robo4j.core.root">
             <value name="target" type="String">javaFXfield</value>
             <value name="targetOut" type="String">httpClient</value>
-            <value name="client" type="String">192.168.178.26</value>
+            <value name="client" type="String">192.168.178.28</value>
             <value name="clientPort" type="String">8025</value>
             <value name="clientUri" type="String">/controller</value>
         </config>

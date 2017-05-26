@@ -17,18 +17,27 @@
 
 package com.robo4j.joystick.tank;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.robo4j.core.ConfigurationException;
 import com.robo4j.core.RoboBuilder;
 import com.robo4j.core.RoboContext;
 import com.robo4j.core.RoboReference;
 import com.robo4j.core.client.util.RoboClassLoader;
+import com.robo4j.core.httpunit.Constants;
 import com.robo4j.core.logging.SimpleLoggingUtil;
-import com.robo4j.core.util.ConstantUtil;
 import com.robo4j.core.util.SystemUtil;
 import com.robo4j.joystick.tank.layout.CameraViewProcessor;
 import com.robo4j.joystick.tank.layout.Joystick;
@@ -48,6 +57,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
 
 /**
@@ -67,8 +79,11 @@ public class TankJoystickMain extends Application {
 	private static final String OPT_COMMANDS_TEXT_FIELD = "not available";
 	private static final int ROTATION_ANGEL = 90;
 	private static final String IMAGE_PROCESSOR = "imageProcessor";
+	private static final int CAMERA_IMAGE_WIDTH = 640;
+	private static final int CAMERA_IMAGE_HEIGHT = 480;
 	private volatile AtomicReference<String> cameraCommandsOpt;
 	private volatile ImageView controllImageView;
+	private volatile MediaView controllMediaView;
 
 	private Button buttonConnect;
 	private TextField optCommandsTextField;
@@ -98,7 +113,7 @@ public class TankJoystickMain extends Application {
 		System.out.println("RoboSystem after start:");
 		System.out.println(SystemUtil.printStateReport(roboSystem));
 
-		this.quadrant = ConstantUtil.EMPTY_STRING;
+		this.quadrant = Constants.EMPTY_STRING;
 		this.executor = Executors.newFixedThreadPool(3);
 		this.scheduledExecutor = Executors.newScheduledThreadPool(1);
 		this.scheduledExecutor2 = Executors.newScheduledThreadPool(1);
@@ -140,7 +155,7 @@ public class TankJoystickMain extends Application {
 
 	// Private Methdos
 	private BorderPane getJoystickPane() {
-		BorderPane result = new BorderPane();
+		final BorderPane result = new BorderPane();
 		result.setPadding(new Insets(15, 12, 15, 12));
 		Joystick joystickPane = new Joystick(ROTATION_ANGEL, JoystickLevelEnum.values().length);
 		joystickPane.addEventHandler(JoystickEventEnum.QUADRANT_CHANGED.getEventType(), e -> {
@@ -181,7 +196,7 @@ public class TankJoystickMain extends Application {
 
 	private HBox getLogos1() {
 		HBox result = new HBox();
-		Image javaOne4Kids = new Image(ClassLoader.getSystemResourceAsStream(JOYSTICK_LOGO_1));
+		Image javaOne4Kids = new Image(RoboClassLoader.getInstance().getResource(JOYSTICK_LOGO_1));
 		ImageView imageView = new ImageView(javaOne4Kids);
 
 		result.getChildren().addAll(imageView);
@@ -190,7 +205,7 @@ public class TankJoystickMain extends Application {
 
 	private HBox getLogos2() {
 		HBox result = new HBox();
-		Image image = new Image(ClassLoader.getSystemResourceAsStream(JOYSTICK_LOGO_2));
+		Image image = new Image(RoboClassLoader.getInstance().getResource(JOYSTICK_LOGO_2));
 		ImageView imageView = new ImageView(image);
 
 		result.getChildren().setAll(imageView);
@@ -212,6 +227,7 @@ public class TankJoystickMain extends Application {
 
 		result.add(ipConnect, VALUE_0, VALUE_0);
 		result.add(getJoystickPane(), VALUE_0, VALUE_1);
+		result.add(getVideoPanel(), VALUE_0, 2);
 
 		result.setStyle(PANEL_CSS);
 		return result;
@@ -220,17 +236,48 @@ public class TankJoystickMain extends Application {
 	private HBox getCameraWindow() {
 		HBox result = new HBox();
 
-		Image image = new Image(ClassLoader.getSystemResourceAsStream(NO_SIGNAL_IMAGE));
+		Image image = new Image(RoboClassLoader.getInstance().getResource(NO_SIGNAL_IMAGE));
 
 		controllImageView = new ImageView();
 		controllImageView.setImage(image);
-		controllImageView.setFitWidth(640);
-		controllImageView.setFitHeight(480);
+		controllImageView.setFitWidth(CAMERA_IMAGE_WIDTH);
+		controllImageView.setFitHeight(CAMERA_IMAGE_HEIGHT);
 		controllImageView.setSmooth(true);
 		controllImageView.setCache(true);
 		result.setStyle(PANEL_CSS);
 		result.getChildren().add(controllImageView);
 		return result;
+	}
+
+	private HBox getVideoPanel(){
+
+		    try {
+				HBox result = new HBox();
+//				URL url = RoboClassLoader.getInstance().getClassLoader().getResource("video1.mp4");
+				String testUrl = "http://192.168.178.28:8554/life.fvl";
+
+
+//				Path path = Paths.get(url.toURI());
+//				Media media = new Media(path.toFile().toURI().toString());
+				Media media = new Media(testUrl);
+				MediaPlayer mediaPlayer = new MediaPlayer(media);
+				mediaPlayer.play();
+
+
+
+
+				controllMediaView = new MediaView(mediaPlayer);
+				controllMediaView.setFitWidth(320);
+				controllMediaView.setFitHeight(240);
+				result.setStyle(PANEL_CSS);
+				result.getChildren().add(controllMediaView);
+				return result;
+
+//			} catch (NullPointerException | URISyntaxException e){
+			} catch ( NullPointerException e){
+		    	throw new RuntimeException("wrong ", e);
+			}
+
 	}
 
 	private void handleConnectButtonOnAction() {
@@ -239,8 +286,8 @@ public class TankJoystickMain extends Application {
 		} else {
 			buttonConnect.setText("Activated");
 			scheduledExecutor.scheduleAtFixedRate(
-					new CameraViewProcessor(roboSystem.getReference(IMAGE_PROCESSOR), controllImageView), 1, 2,
-					TimeUnit.SECONDS);
+					new CameraViewProcessor(roboSystem.getReference(IMAGE_PROCESSOR), controllImageView), 1, 200,
+					TimeUnit.MILLISECONDS);
 		}
 	}
 
