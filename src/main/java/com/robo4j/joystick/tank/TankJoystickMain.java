@@ -286,7 +286,7 @@ public class TankJoystickMain extends Application {
 		} else {
 			buttonConnect.setText("Activated");
 			scheduledExecutor.scheduleAtFixedRate(
-					new CameraViewProcessor(roboSystem.getReference(IMAGE_PROCESSOR), controllImageView), 1, 200,
+					new CameraViewProcessor(roboSystem.getReference(IMAGE_PROCESSOR), controllImageView), 1, 1200,
 					TimeUnit.MILLISECONDS);
 		}
 	}
