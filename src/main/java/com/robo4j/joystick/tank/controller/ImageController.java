@@ -22,8 +22,7 @@ import com.robo4j.core.LifecycleState;
 import com.robo4j.core.RoboContext;
 import com.robo4j.core.RoboUnit;
 import com.robo4j.core.configuration.Configuration;
-import com.robo4j.core.httpunit.codec.CameraMessage;
-import com.robo4j.core.logging.SimpleLoggingUtil;
+import com.robo4j.socket.http.codec.CameraMessage;
 
 /**
  * @author Marcus Hirt (@hirt)
@@ -31,36 +30,36 @@ import com.robo4j.core.logging.SimpleLoggingUtil;
  */
 public class ImageController extends RoboUnit<CameraMessage> {
 
-    private String target;
+	private String target;
 
 	public ImageController(RoboContext context, String id) {
 		super(CameraMessage.class, context, id);
 	}
 
-    @Override
-    public void onInitialization(Configuration configuration) throws ConfigurationException {
-        target = configuration.getString("target", null);
-        if (target == null) {
-            throw ConfigurationException.createMissingConfigNameException("target");
-        }
-    }
+	@Override
+	public void onInitialization(Configuration configuration) throws ConfigurationException {
+		target = configuration.getString("target", null);
+		if (target == null) {
+			throw ConfigurationException.createMissingConfigNameException("target");
+		}
+	}
 
-    @Override
-    public void onMessage(CameraMessage message) {
-        getContext().getReference(target).sendMessage(message);
-    }
+	@Override
+	public void onMessage(CameraMessage message) {
+		getContext().getReference(target).sendMessage(message);
+	}
 
-    @Override
-    public void stop() {
-        setState(LifecycleState.STOPPING);
-        setState(LifecycleState.STOPPED);
-    }
+	@Override
+	public void stop() {
+		setState(LifecycleState.STOPPING);
+		setState(LifecycleState.STOPPED);
+	}
 
-    @Override
-    public void shutdown() {
-        setState(LifecycleState.SHUTTING_DOWN);
-        setState(LifecycleState.SHUTDOWN);
-        System.exit(0);
-    }
+	@Override
+	public void shutdown() {
+		setState(LifecycleState.SHUTTING_DOWN);
+		setState(LifecycleState.SHUTDOWN);
+		System.exit(0);
+	}
 
 }

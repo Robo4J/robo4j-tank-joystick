@@ -17,25 +17,21 @@
 
 <robo4j>
     <roboUnit id="httpClient">
-        <class>com.robo4j.core.httpunit.HttpClientUnit</class>
+        <class>com.robo4j.socket.http.units.HttpClientUnit</class>
         <config name="com.robo4j.core.root">
-            <value name="address" type="String">192.168.178.26</value>
+            <value name="address" type="String">192.168.0.111</value>
             <value name="port" type="int">8025</value>
-            <targetUnits>
-                <value name="controller" type="String">POST</value>
-            </targetUnits>
+            <value name="targetUnits" type="String">{"controller":"POST"}</value>
         </config>
     </roboUnit>
 
     <roboUnit id="httpServer">
-        <class>com.robo4j.core.httpunit.HttpServerUnit</class>
+        <class>com.robo4j.socket.http.units.HttpServerUnit</class>
         <config name="com.robo4j.core.root">
             <value name="port" type="int">8027</value>
             <value name="target" type="String">imageController</value>
-            <value name="packages" type="String">com.robo4j.core.httpunit.codec</value>
-            <targetUnits>
-                <value name="imageController" type="String">POST</value>
-            </targetUnits>
+            <value name="packages" type="String">com.robo4j.socket.http.codec</value>
+            <value name="targetUnits" type="String">{"imageController":"POST"}</value>
         </config>
     </roboUnit>
 
@@ -58,7 +54,7 @@
         <config name="com.robo4j.core.root">
             <value name="target" type="String">javaFXfield</value>
             <value name="targetOut" type="String">httpClient</value>
-            <value name="client" type="String">192.168.178.28</value>
+            <value name="client" type="String">192.168.0.111</value>
             <value name="clientPort" type="String">8025</value>
             <value name="clientUri" type="String">/controller</value>
         </config>

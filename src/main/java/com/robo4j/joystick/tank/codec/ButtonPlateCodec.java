@@ -17,10 +17,11 @@
 
 package com.robo4j.joystick.tank.codec;
 
-import com.robo4j.core.httpunit.HttpDecoder;
-import com.robo4j.core.httpunit.HttpEncoder;
-import com.robo4j.core.httpunit.codec.SimpleCommand;
-import com.robo4j.core.httpunit.codec.SimpleCommandCodec;
+
+import com.robo4j.socket.http.codec.SimpleCommand;
+import com.robo4j.socket.http.codec.SimpleCommandCodec;
+import com.robo4j.socket.http.units.HttpDecoder;
+import com.robo4j.socket.http.units.HttpEncoder;
 
 /**
  *
@@ -29,7 +30,7 @@ import com.robo4j.core.httpunit.codec.SimpleCommandCodec;
  * @author Marcus Hirt (@hirt)
  * @author Miro Wengner (@miragemiko)
  */
-public class LegoButtonPlateCodec implements HttpDecoder<String>, HttpEncoder<String> {
+public class ButtonPlateCodec implements HttpDecoder<String>, HttpEncoder<String> {
 
 	private final SimpleCommandCodec codec = new SimpleCommandCodec();
 

@@ -17,27 +17,17 @@
 
 package com.robo4j.joystick.tank;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.robo4j.core.ConfigurationException;
 import com.robo4j.core.RoboBuilder;
 import com.robo4j.core.RoboContext;
 import com.robo4j.core.RoboReference;
-import com.robo4j.core.client.util.RoboClassLoader;
-import com.robo4j.core.httpunit.Constants;
 import com.robo4j.core.logging.SimpleLoggingUtil;
+import com.robo4j.core.util.HelperUtil;
 import com.robo4j.core.util.SystemUtil;
 import com.robo4j.joystick.tank.layout.CameraViewProcessor;
 import com.robo4j.joystick.tank.layout.Joystick;
@@ -106,14 +96,15 @@ public class TankJoystickMain extends Application {
 	public void start(Stage primaryStage) throws Exception {
 
 		SimpleLoggingUtil.print(getClass(), "Demo Starts");
-		RoboBuilder builder = new RoboBuilder().add(RoboClassLoader.getInstance().getResource("robo4j.xml"));
+		RoboBuilder builder = new RoboBuilder();
+		builder.add(Thread.currentThread().getContextClassLoader().getResourceAsStream("robo4j.xml"));
 		roboSystem = builder.build();
 		platformController = roboSystem.getReference("legoController");
 		roboSystem.start();
 		System.out.println("RoboSystem after start:");
 		System.out.println(SystemUtil.printStateReport(roboSystem));
 
-		this.quadrant = Constants.EMPTY_STRING;
+		this.quadrant = HelperUtil.EMPTY_STRING;
 		this.executor = Executors.newFixedThreadPool(3);
 		this.scheduledExecutor = Executors.newScheduledThreadPool(1);
 		this.scheduledExecutor2 = Executors.newScheduledThreadPool(1);
@@ -196,7 +187,7 @@ public class TankJoystickMain extends Application {
 
 	private HBox getLogos1() {
 		HBox result = new HBox();
-		Image javaOne4Kids = new Image(RoboClassLoader.getInstance().getResource(JOYSTICK_LOGO_1));
+		Image javaOne4Kids = new Image(Thread.currentThread().getContextClassLoader().getResourceAsStream(JOYSTICK_LOGO_1));
 		ImageView imageView = new ImageView(javaOne4Kids);
 
 		result.getChildren().addAll(imageView);
@@ -205,7 +196,7 @@ public class TankJoystickMain extends Application {
 
 	private HBox getLogos2() {
 		HBox result = new HBox();
-		Image image = new Image(RoboClassLoader.getInstance().getResource(JOYSTICK_LOGO_2));
+		Image image = new Image(Thread.currentThread().getContextClassLoader().getResourceAsStream(JOYSTICK_LOGO_2));
 		ImageView imageView = new ImageView(image);
 
 		result.getChildren().setAll(imageView);
@@ -236,7 +227,7 @@ public class TankJoystickMain extends Application {
 	private HBox getCameraWindow() {
 		HBox result = new HBox();
 
-		Image image = new Image(RoboClassLoader.getInstance().getResource(NO_SIGNAL_IMAGE));
+		Image image = new Image(Thread.currentThread().getContextClassLoader().getResourceAsStream(NO_SIGNAL_IMAGE));
 
 		controllImageView = new ImageView();
 		controllImageView.setImage(image);
@@ -249,34 +240,31 @@ public class TankJoystickMain extends Application {
 		return result;
 	}
 
-	private HBox getVideoPanel(){
+	private HBox getVideoPanel() {
 
-		    try {
-				HBox result = new HBox();
-//				URL url = RoboClassLoader.getInstance().getClassLoader().getResource("video1.mp4");
-				String testUrl = "http://192.168.178.28:8554/life.fvl";
+		try {
+			HBox result = new HBox();
+			// URL url =
+			// RoboClassLoader.getInstance().getClassLoader().getResource("video1.mp4");
+			String testUrl = "http://192.168.178.28:8554/life.fvl";
 
+			// Path path = Paths.get(url.toURI());
+			// Media media = new Media(path.toFile().toURI().toString());
+			Media media = new Media(testUrl);
+			MediaPlayer mediaPlayer = new MediaPlayer(media);
+			mediaPlayer.play();
 
-//				Path path = Paths.get(url.toURI());
-//				Media media = new Media(path.toFile().toURI().toString());
-				Media media = new Media(testUrl);
-				MediaPlayer mediaPlayer = new MediaPlayer(media);
-				mediaPlayer.play();
+			controllMediaView = new MediaView(mediaPlayer);
+			controllMediaView.setFitWidth(320);
+			controllMediaView.setFitHeight(240);
+			result.setStyle(PANEL_CSS);
+			result.getChildren().add(controllMediaView);
+			return result;
 
-
-
-
-				controllMediaView = new MediaView(mediaPlayer);
-				controllMediaView.setFitWidth(320);
-				controllMediaView.setFitHeight(240);
-				result.setStyle(PANEL_CSS);
-				result.getChildren().add(controllMediaView);
-				return result;
-
-//			} catch (NullPointerException | URISyntaxException e){
-			} catch ( NullPointerException e){
-		    	throw new RuntimeException("wrong ", e);
-			}
+			// } catch (NullPointerException | URISyntaxException e){
+		} catch (NullPointerException e) {
+			throw new RuntimeException("wrong ", e);
+		}
 
 	}
 

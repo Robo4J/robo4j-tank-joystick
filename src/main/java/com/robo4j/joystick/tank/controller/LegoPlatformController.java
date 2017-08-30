@@ -21,11 +21,12 @@ import com.robo4j.core.ConfigurationException;
 import com.robo4j.core.LifecycleState;
 import com.robo4j.core.RoboContext;
 import com.robo4j.core.RoboUnit;
-import com.robo4j.core.client.util.RoboHttpUtils;
 import com.robo4j.core.configuration.Configuration;
-import com.robo4j.core.httpunit.Constants;
-import com.robo4j.joystick.tank.codec.LegoButtonPlateCodec;
+import com.robo4j.core.util.HelperUtil;
+import com.robo4j.joystick.tank.codec.ButtonPlateCodec;
 import com.robo4j.joystick.tank.layout.enums.JoystickCommandEnum;
+import com.robo4j.socket.http.HttpMethod;
+import com.robo4j.socket.http.util.RoboHttpUtils;
 
 import sun.net.util.IPAddressUtil;
 
@@ -35,7 +36,7 @@ import sun.net.util.IPAddressUtil;
  */
 public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 
-	private final LegoButtonPlateCodec codec = new LegoButtonPlateCodec();
+	private final ButtonPlateCodec codec = new ButtonPlateCodec();
 	private String target;
 	private String targetOut;
 	private String client;
@@ -58,7 +59,7 @@ public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 		if (IPAddressUtil.isIPv4LiteralAddress(tmpClient)) {
 			String clientPort = configuration.getString("clientPort", null);
 			client = clientPort == null ? tmpClient : tmpClient.concat(":").concat(clientPort);
-			clientUri = configuration.getString("clientUri", Constants.EMPTY_STRING);
+			clientUri = configuration.getString("clientUri", HelperUtil.EMPTY_STRING);
 		} else {
 			client = null;
 		}
@@ -89,7 +90,7 @@ public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 
 	private void processJoystickMessage(JoystickCommandEnum message) {
 		sendClientMessage(getContext(),
-				RoboHttpUtils.createPostRequest(client, clientUri, codec.encode(message.getName())));
+				RoboHttpUtils.createRequest(HttpMethod.POST, client, clientUri, codec.encode(message.getName())));
 	}
 
 }
