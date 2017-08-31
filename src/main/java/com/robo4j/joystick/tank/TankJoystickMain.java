@@ -96,7 +96,8 @@ public class TankJoystickMain extends Application {
 	public void start(Stage primaryStage) throws Exception {
 
 		SimpleLoggingUtil.print(getClass(), "Demo Starts");
-		RoboBuilder builder = new RoboBuilder();
+		RoboBuilder builder = new RoboBuilder(
+				Thread.currentThread().getContextClassLoader().getResourceAsStream("robo4jSystem.xml"));
 		builder.add(Thread.currentThread().getContextClassLoader().getResourceAsStream("robo4j.xml"));
 		roboSystem = builder.build();
 		platformController = roboSystem.getReference("legoController");
@@ -187,7 +188,8 @@ public class TankJoystickMain extends Application {
 
 	private HBox getLogos1() {
 		HBox result = new HBox();
-		Image javaOne4Kids = new Image(Thread.currentThread().getContextClassLoader().getResourceAsStream(JOYSTICK_LOGO_1));
+		Image javaOne4Kids = new Image(
+				Thread.currentThread().getContextClassLoader().getResourceAsStream(JOYSTICK_LOGO_1));
 		ImageView imageView = new ImageView(javaOne4Kids);
 
 		result.getChildren().addAll(imageView);
@@ -273,9 +275,8 @@ public class TankJoystickMain extends Application {
 			SimpleLoggingUtil.print(getClass(), "scheduler active");
 		} else {
 			buttonConnect.setText("Activated");
-			scheduledExecutor.scheduleAtFixedRate(
-					new CameraViewProcessor(roboSystem.getReference(IMAGE_PROCESSOR), controllImageView), 1, 1200,
-					TimeUnit.MILLISECONDS);
+			roboSystem.getScheduler().scheduleAtFixedRate(new CameraViewProcessor(roboSystem.getReference(IMAGE_PROCESSOR),
+			controllImageView), 1, 1000, TimeUnit.MILLISECONDS);
 		}
 	}
 

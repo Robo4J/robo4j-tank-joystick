@@ -32,6 +32,7 @@
             <value name="target" type="String">imageController</value>
             <value name="packages" type="String">com.robo4j.socket.http.codec</value>
             <value name="targetUnits" type="String">{"imageController":"POST"}</value>
+            <value name="stopper" type="int">-1</value>
         </config>
     </roboUnit>
 
