@@ -17,17 +17,16 @@
 
 package com.robo4j.joystick.tank.controller;
 
-import com.robo4j.core.ConfigurationException;
-import com.robo4j.core.LifecycleState;
-import com.robo4j.core.RoboContext;
-import com.robo4j.core.RoboUnit;
-import com.robo4j.core.client.util.RoboHttpUtils;
-import com.robo4j.core.configuration.Configuration;
-import com.robo4j.core.util.ConstantUtil;
+
+import com.robo4j.ConfigurationException;
+import com.robo4j.RoboContext;
+import com.robo4j.RoboUnit;
+import com.robo4j.configuration.Configuration;
 import com.robo4j.joystick.tank.codec.LegoButtonPlateCodec;
 import com.robo4j.joystick.tank.layout.enums.JoystickCommandEnum;
-
-import sun.net.util.IPAddressUtil;
+import com.robo4j.socket.http.HttpMethod;
+import com.robo4j.socket.http.util.RoboHttpUtils;
+import com.robo4j.util.StringConstants;
 
 /**
  * @author Marcus Hirt (@hirt)
@@ -35,61 +34,45 @@ import sun.net.util.IPAddressUtil;
  */
 public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 
-	private final LegoButtonPlateCodec codec = new LegoButtonPlateCodec();
-	private String target;
-	private String targetOut;
-	private String client;
-	private String clientUri;
+    private final LegoButtonPlateCodec codec = new LegoButtonPlateCodec();
+    private String target;
+    private String targetOut;
+    private String client;
+    private String clientUri;
 
-	public LegoPlatformController(RoboContext context, String id) {
-		super(JoystickCommandEnum.class, context, id);
-	}
+    public LegoPlatformController(RoboContext context, String id) {
+        super(JoystickCommandEnum.class, context, id);
+    }
 
-	@Override
-	public void onInitialization(Configuration configuration) throws ConfigurationException {
-		target = configuration.getString("target", null);
-		targetOut = configuration.getString("targetOut", null);
-		String tmpClient = configuration.getString("client", null);
+    @Override
+    public void onInitialization(Configuration configuration) throws ConfigurationException {
+        target = configuration.getString("target", null);
+        targetOut = configuration.getString("targetOut", null);
+        String tmpClient = configuration.getString("client", null);
 
-		if (target == null || tmpClient == null || targetOut == null) {
-			throw ConfigurationException.createMissingConfigNameException("target, client");
-		}
+        if (target == null || tmpClient == null || targetOut == null) {
+            throw ConfigurationException.createMissingConfigNameException("target, client");
+        }
+        int clientPort = configuration.getInteger("clientPort", 8025);
+        client = tmpClient + ":" + clientPort;
+        clientUri = configuration.getString("clientUri", StringConstants.EMPTY);
+    }
 
-		if (IPAddressUtil.isIPv4LiteralAddress(tmpClient)) {
-			String clientPort = configuration.getString("clientPort", null);
-			client = clientPort == null ? tmpClient : tmpClient.concat(":").concat(clientPort);
-			clientUri = configuration.getString("clientUri", ConstantUtil.EMPTY_STRING);
-		} else {
-			client = null;
-		}
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onMessage(JoystickCommandEnum message) {
+        processJoystickMessage(message);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void onMessage(JoystickCommandEnum message) {
-		processJoystickMessage(message);
-	}
 
-	@Override
-	public void stop() {
-		setState(LifecycleState.STOPPING);
-		setState(LifecycleState.STOPPED);
-	}
+    // Private Methods
+    private void sendClientMessage(RoboContext ctx, String message) {
+        ctx.getReference(targetOut).sendMessage(message);
+    }
 
-	@Override
-	public void shutdown() {
-		setState(LifecycleState.SHUTTING_DOWN);
-		setState(LifecycleState.SHUTDOWN);
-	}
-
-	// Private Methods
-	private void sendClientMessage(RoboContext ctx, String message) {
-		ctx.getReference(targetOut).sendMessage(message);
-	}
-
-	private void processJoystickMessage(JoystickCommandEnum message) {
-		sendClientMessage(getContext(),
-				RoboHttpUtils.createPostRequest(client, clientUri, codec.encode(message.getName())));
-	}
+    private void processJoystickMessage(JoystickCommandEnum message) {
+        sendClientMessage(getContext(), RoboHttpUtils
+                .createRequest(HttpMethod.POST, client, clientUri, codec.encode(message.getName())));
+    }
 
 }

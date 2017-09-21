@@ -17,13 +17,12 @@
 
 package com.robo4j.joystick.tank.codec;
 
-import com.robo4j.core.httpunit.HttpDecoder;
-import com.robo4j.core.httpunit.HttpEncoder;
-import com.robo4j.core.httpunit.codec.SimpleCommand;
-import com.robo4j.core.httpunit.codec.SimpleCommandCodec;
+import com.robo4j.socket.http.codec.SimpleCommand;
+import com.robo4j.socket.http.codec.SimpleCommandCodec;
+import com.robo4j.socket.http.units.HttpDecoder;
+import com.robo4j.socket.http.units.HttpEncoder;
 
 /**
- *
  * Codec is used by Controller to construct post
  *
  * @author Marcus Hirt (@hirt)
@@ -31,27 +30,27 @@ import com.robo4j.core.httpunit.codec.SimpleCommandCodec;
  */
 public class LegoButtonPlateCodec implements HttpDecoder<String>, HttpEncoder<String> {
 
-	private final SimpleCommandCodec codec = new SimpleCommandCodec();
+    private final SimpleCommandCodec codec = new SimpleCommandCodec();
 
-	@Override
-	public String decode(String json) {
-		final SimpleCommand simpleCommand = codec.decode(json);
-		return simpleCommand.getValue();
-	}
+    @Override
+    public String decode(String json) {
+        final SimpleCommand simpleCommand = codec.decode(json);
+        return simpleCommand.getValue();
+    }
 
-	@Override
-	public Class<String> getDecodedClass() {
-		return String.class;
-	}
+    @Override
+    public Class<String> getDecodedClass() {
+        return String.class;
+    }
 
-	@Override
-	public String encode(String s) {
-		final SimpleCommand simpleCommand = new SimpleCommand(s);
-		return codec.encode(simpleCommand);
-	}
+    @Override
+    public String encode(String s) {
+        final SimpleCommand simpleCommand = new SimpleCommand(s);
+        return codec.encode(simpleCommand);
+    }
 
-	@Override
-	public Class<String> getEncodedClass() {
-		return String.class;
-	}
+    @Override
+    public Class<String> getEncodedClass() {
+        return String.class;
+    }
 }
