@@ -18,6 +18,7 @@
 package com.robo4j.joystick.tank.controller;
 
 
+import com.robo4j.BlockingTrait;
 import com.robo4j.ConfigurationException;
 import com.robo4j.RoboContext;
 import com.robo4j.RoboUnit;
@@ -32,6 +33,7 @@ import com.robo4j.util.StringConstants;
  * @author Marcus Hirt (@hirt)
  * @author Miro Wengner (@miragemiko)
  */
+@BlockingTrait
 public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 
     private final LegoButtonPlateCodec codec = new LegoButtonPlateCodec();

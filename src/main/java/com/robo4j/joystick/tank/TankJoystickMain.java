@@ -39,6 +39,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author Marcus Hirt (@hirt)
  * @author Miro Wengner (@miragemiko)
@@ -55,6 +58,7 @@ public class TankJoystickMain extends Application {
     private static final int ROTATION_ANGEL = 90;
 
     // Speed Properties
+    private ExecutorService executor;
     private String quadrant;
     private RoboContext roboSystem;
     private RoboReference<JoystickCommandEnum> platformController;
@@ -67,7 +71,7 @@ public class TankJoystickMain extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         SimpleLoggingUtil.print(getClass(), "Demo Starts");
-        RoboBuilder builder = new RoboBuilder(TankJoystickMain.class.getClassLoader().getResourceAsStream("robo4jSystem.xml"))
+        RoboBuilder builder = new RoboBuilder()
                 .add(TankJoystickMain.class.getClassLoader().getResourceAsStream("robo4j.xml"));
         roboSystem = builder.build();
         platformController = roboSystem.getReference("legoController");
@@ -76,6 +80,7 @@ public class TankJoystickMain extends Application {
         System.out.println(SystemUtil.printStateReport(roboSystem));
 
         this.quadrant = StringConstants.EMPTY;
+        this.executor = Executors.newFixedThreadPool(3);
 
         GridPane borderPane = new GridPane();
 
@@ -85,12 +90,12 @@ public class TankJoystickMain extends Application {
         primaryStage.setTitle("Robo4j-Joystick");
         SimpleLoggingUtil.print(getClass(), "SHOW SCENE");
         primaryStage.show();
-
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
+        executor.shutdownNow();
         SimpleLoggingUtil.print(getClass(), "JOYSTICK STOPPED");
         roboSystem.stop();
         System.out.println("State after stop:");
@@ -105,11 +110,12 @@ public class TankJoystickMain extends Application {
         Joystick joystickPane = new Joystick(ROTATION_ANGEL, JoystickLevelEnum.values().length);
         joystickPane.addEventHandler(JoystickEventEnum.QUADRANT_CHANGED.getEventType(), e -> {
             quadrant = getQuadrantToCommand(e.getQuadrant());
+//            executor.execute(() -> sendPostRequest(quadrant));
             roboSystem.getScheduler().execute(() -> sendPostRequest(quadrant));
         });
 
         joystickPane.addEventHandler(JoystickEventEnum.LEVEL_CHANGED.getEventType(), e -> {
-            roboSystem.getScheduler().execute(() -> sendPostRequest(quadrant));
+            executor.execute(() -> sendPostRequest(quadrant));
 
         });
         result.setCenter(joystickPane);
