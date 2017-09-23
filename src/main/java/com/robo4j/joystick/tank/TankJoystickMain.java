@@ -39,6 +39,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,6 +51,7 @@ import java.util.concurrent.Executors;
  */
 public class TankJoystickMain extends Application {
 
+    private static final String ROBO4J_CONFIGURATION = "robo4j.xml";
     private static final String JOYSTICK_LOGO_1 = "robo4j128text.png";
 
     private static final String PANEL_CSS = "-fx-border-color:darkblue; \n" + "-fx-background-color: #336699;\n"
@@ -56,6 +60,7 @@ public class TankJoystickMain extends Application {
     private static final int VALUE_0 = 0;
     private static final int VALUE_1 = 1;
     private static final int ROTATION_ANGEL = 90;
+    private static String joystickConfigurationFileName;
 
     // Speed Properties
     private ExecutorService executor;
@@ -64,6 +69,13 @@ public class TankJoystickMain extends Application {
     private RoboReference<JoystickCommandEnum> platformController;
 
     public static void main(String... args) {
+        switch (args.length){
+            case 1:
+                joystickConfigurationFileName = args[0];
+                break;
+            default:
+                break;
+        }
         launch(args);
     }
 
@@ -71,8 +83,13 @@ public class TankJoystickMain extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         SimpleLoggingUtil.print(getClass(), "Demo Starts");
+
+        InputStream isConfig = joystickConfigurationFileName == null ?
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(ROBO4J_CONFIGURATION) :
+                Files.newInputStream(Paths.get(joystickConfigurationFileName));
         RoboBuilder builder = new RoboBuilder()
-                .add(TankJoystickMain.class.getClassLoader().getResourceAsStream("robo4j.xml"));
+                .add(isConfig);
+
         roboSystem = builder.build();
         platformController = roboSystem.getReference("legoController");
         roboSystem.start();
@@ -88,7 +105,6 @@ public class TankJoystickMain extends Application {
         borderPane.add(getLeftPanel(), VALUE_0, 1);
         primaryStage.setScene(new Scene(borderPane));
         primaryStage.setTitle("Robo4j-Joystick");
-        SimpleLoggingUtil.print(getClass(), "SHOW SCENE");
         primaryStage.show();
     }
 
@@ -96,11 +112,9 @@ public class TankJoystickMain extends Application {
     public void stop() throws Exception {
         super.stop();
         executor.shutdownNow();
-        SimpleLoggingUtil.print(getClass(), "JOYSTICK STOPPED");
         roboSystem.stop();
-        System.out.println("State after stop:");
-        System.out.println(SystemUtil.printStateReport(roboSystem));
         roboSystem.shutdown();
+        System.out.println(SystemUtil.printStateReport(roboSystem));
     }
 
     // Private Methdos
@@ -110,12 +124,11 @@ public class TankJoystickMain extends Application {
         Joystick joystickPane = new Joystick(ROTATION_ANGEL, JoystickLevelEnum.values().length);
         joystickPane.addEventHandler(JoystickEventEnum.QUADRANT_CHANGED.getEventType(), e -> {
             quadrant = getQuadrantToCommand(e.getQuadrant());
-//            executor.execute(() -> sendPostRequest(quadrant));
             roboSystem.getScheduler().execute(() -> sendPostRequest(quadrant));
         });
 
         joystickPane.addEventHandler(JoystickEventEnum.LEVEL_CHANGED.getEventType(), e -> {
-            executor.execute(() -> sendPostRequest(quadrant));
+            roboSystem.getScheduler().execute(() -> sendPostRequest(quadrant));
 
         });
         result.setCenter(joystickPane);
@@ -123,8 +136,6 @@ public class TankJoystickMain extends Application {
     }
 
     private void sendPostRequest(String command) {
-        SimpleLoggingUtil.print(getClass(), "send post command: " + command);
-        SimpleLoggingUtil.print(getClass(), " sendPostRequest: " + JoystickCommandEnum.getByName(command));
         platformController.sendMessage(JoystickCommandEnum.getByName(command));
     }
 
