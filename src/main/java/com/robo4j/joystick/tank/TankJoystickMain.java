@@ -74,6 +74,7 @@ public class TankJoystickMain extends Application {
                 joystickConfigurationFileName = args[0];
                 break;
             default:
+                System.out.println("default configuration");
                 break;
         }
         launch(args);
