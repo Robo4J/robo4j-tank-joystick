@@ -22,7 +22,7 @@ import com.robo4j.CriticalSectionTrait;
 import com.robo4j.RoboContext;
 import com.robo4j.RoboUnit;
 import com.robo4j.configuration.Configuration;
-import com.robo4j.joystick.tank.layout.enums.JoystickCommandEnum;
+import com.robo4j.joystick.tank.layout.enums.WeaponCommandEnum;
 import com.robo4j.socket.http.HttpMethod;
 import com.robo4j.socket.http.codec.SimpleCommand;
 import com.robo4j.socket.http.codec.SimpleCommandCodec;
@@ -34,25 +34,23 @@ import com.robo4j.util.StringConstants;
  * @author Miro Wengner (@miragemiko)
  */
 @CriticalSectionTrait
-public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
+public class LegoWeaponController extends RoboUnit<WeaponCommandEnum> {
 
 	private final SimpleCommandCodec codec = new SimpleCommandCodec();
-	private String target;
 	private String targetOut;
 	private String client;
 	private String clientUri;
 
-	public LegoPlatformController(RoboContext context, String id) {
-		super(JoystickCommandEnum.class, context, id);
+	public LegoWeaponController(RoboContext context, String id) {
+		super(WeaponCommandEnum.class, context, id);
 	}
 
 	@Override
 	public void onInitialization(Configuration configuration) throws ConfigurationException {
-		target = configuration.getString("target", null);
 		targetOut = configuration.getString("targetOut", null);
 		String tmpClient = configuration.getString("client", null);
 
-		if (target == null || tmpClient == null || targetOut == null) {
+		if (tmpClient == null || targetOut == null) {
 			throw ConfigurationException.createMissingConfigNameException("target, client");
 		}
 		int clientPort = configuration.getInteger("clientPort", 8025);
@@ -62,8 +60,8 @@ public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMessage(JoystickCommandEnum message) {
-		processJoystickMessage(message);
+	public void onMessage(WeaponCommandEnum message) {
+		processWeaponMessage(message);
 	}
 
 	// Private Methods
@@ -71,9 +69,9 @@ public class LegoPlatformController extends RoboUnit<JoystickCommandEnum> {
 		ctx.getReference(targetOut).sendMessage(message);
 	}
 
-	private void processJoystickMessage(JoystickCommandEnum message) {
-		sendClientMessage(getContext(), RoboHttpUtils.createRequest(HttpMethod.POST, client, clientUri,
-				codec.encode(new SimpleCommand(message.getName()))));
+	private void processWeaponMessage(WeaponCommandEnum message) {
+		String command = RoboHttpUtils
+				.createRequest(HttpMethod.POST, client, clientUri, codec.encode(new SimpleCommand(message.getName())));
+		sendClientMessage(getContext(), command);
 	}
-
 }
