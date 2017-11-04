@@ -19,9 +19,8 @@
     <roboUnit id="httpClient">
         <class>com.robo4j.socket.http.units.HttpClientUnit</class>
         <config name="com.robo4j.root">
-            <value name="address" type="String">192.168.178.26</value>
-            <value name="port" type="int">8025</value>
-            <value name="mode" type="boolean">true</value>
+            <value name="address" type="String">192.168.0.6</value>
+            <value name="port" type="int">8042</value>
             <value name="targetUnits" type="String">{"controller":"POST"}</value>
         </config>
     </roboUnit>
@@ -29,7 +28,7 @@
     <roboUnit id="httpServer">
         <class>com.robo4j.socket.http.units.HttpServerUnit</class>
         <config name="com.robo4j.root">
-            <value name="port" type="int">8027</value>
+            <value name="port" type="int">8048</value>
         </config>
     </roboUnit>
 
@@ -38,9 +37,18 @@
         <config name="com.robo4j.root">
             <value name="target" type="String">javaFXfield</value>
             <value name="targetOut" type="String">httpClient</value>
-            <value name="client" type="String">192.168.178.26</value>
-            <value name="clientPort" type="int">8025</value>
+            <value name="client" type="String">192.168.0.6</value>
+            <value name="clientPort" type="int">8042</value>
             <value name="clientUri" type="String">/units/controller</value>
+        </config>
+    </roboUnit>
+    <roboUnit id="legoWeaponController">
+        <class>com.robo4j.joystick.tank.controller.LegoWeaponController</class>
+        <config name="com.robo4j.root">
+            <value name="targetOut" type="String">httpClient</value>
+            <value name="client" type="String">192.168.0.6</value>
+            <value name="clientPort" type="int">8042</value>
+            <value name="clientUri" type="String">/units/weaponController</value>
         </config>
     </roboUnit>
 </robo4j>

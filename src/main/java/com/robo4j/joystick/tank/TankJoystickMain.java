@@ -26,12 +26,14 @@ import com.robo4j.joystick.tank.layout.enums.JoystickCommandEnum;
 import com.robo4j.joystick.tank.layout.enums.JoystickEventEnum;
 import com.robo4j.joystick.tank.layout.enums.JoystickLevelEnum;
 import com.robo4j.joystick.tank.layout.enums.QuadrantEnum;
+import com.robo4j.joystick.tank.layout.enums.WeaponCommandEnum;
 import com.robo4j.logging.SimpleLoggingUtil;
 import com.robo4j.util.StringConstants;
 import com.robo4j.util.SystemUtil;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -67,6 +69,8 @@ public class TankJoystickMain extends Application {
     private String quadrant;
     private RoboContext roboSystem;
     private RoboReference<JoystickCommandEnum> platformController;
+    private RoboReference<WeaponCommandEnum> weaponController;
+    private boolean weaponActive = false;
 
     public static void main(String... args) {
         switch (args.length){
@@ -93,6 +97,7 @@ public class TankJoystickMain extends Application {
 
         roboSystem = builder.build();
         platformController = roboSystem.getReference("legoController");
+        weaponController = roboSystem.getReference("legoWeaponController");
         roboSystem.start();
         System.out.println("RoboSystem after start:");
         System.out.println(SystemUtil.printStateReport(roboSystem));
@@ -125,19 +130,29 @@ public class TankJoystickMain extends Application {
         Joystick joystickPane = new Joystick(ROTATION_ANGEL, JoystickLevelEnum.values().length);
         joystickPane.addEventHandler(JoystickEventEnum.QUADRANT_CHANGED.getEventType(), e -> {
             quadrant = getQuadrantToCommand(e.getQuadrant());
-            roboSystem.getScheduler().execute(() -> sendPostRequest(quadrant));
+            roboSystem.getScheduler().execute(() -> sendPlatformPostRequest(quadrant));
         });
 
         joystickPane.addEventHandler(JoystickEventEnum.LEVEL_CHANGED.getEventType(), e -> {
-            roboSystem.getScheduler().execute(() -> sendPostRequest(quadrant));
+            roboSystem.getScheduler().execute(() -> sendPlatformPostRequest(quadrant));
 
         });
         result.setCenter(joystickPane);
         return result;
     }
 
-    private void sendPostRequest(String command) {
+    private void sendPlatformPostRequest(String command) {
         platformController.sendMessage(JoystickCommandEnum.getByName(command));
+    }
+
+    private void sendWeaponPostRequest(){
+        if(weaponActive){
+            weaponController.sendMessage(WeaponCommandEnum.STOP);
+            weaponActive=false;
+        } else {
+            weaponController.sendMessage(WeaponCommandEnum.FORWARD);
+            weaponActive=true;
+        }
     }
 
     private String getQuadrantToCommand(final QuadrantEnum quadrant) {
@@ -162,7 +177,10 @@ public class TankJoystickMain extends Application {
         Image javaOne4Kids = new Image(ClassLoader.getSystemResourceAsStream(JOYSTICK_LOGO_1));
         ImageView imageView = new ImageView(javaOne4Kids);
 
-        result.getChildren().addAll(imageView);
+        Button weaponButton = new Button("Weapon");
+        weaponButton.setOnAction((event) -> roboSystem.getScheduler().execute(this::sendWeaponPostRequest));
+
+        result.getChildren().addAll(imageView, weaponButton);
         return result;
     }
 

@@ -77,7 +77,7 @@ public class JoystickController {
 	private void initProperties(final double radius, final int levelNumber) {
 		radiusProperty = new SimpleDoubleProperty();
 		// @formatter:off
-		levels = IntStream.range(0, levelNumber).mapToObj(Integer::new)
+		levels = IntStream.range(0, levelNumber).boxed()
 				.collect(Collectors.toMap(i -> i, i -> createProperty(radius, levelNumber, i + 1)));
 		// @formatter:on
 		povCenterXProperty = new SimpleDoubleProperty();
